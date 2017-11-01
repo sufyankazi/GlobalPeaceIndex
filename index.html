@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <style>
+  @import url('https://fonts.googleapis.com/css?family=Lato');
+    
+    html{height:100%;}
+
+    body{
+      font-family: 'Helvetica Neue Light', Helvetica,sans-serif;
+      background-color: #FBFBFB;
+      font-variant: small-caps;
+      width: 100%;
+      height:100%;
+      min-height: 100%;
+      padding: 30px 0px;
+      margin: 0 auto;
+      text-align:center;
+
+    }
+
+    h2, h3 {
+      font-family: 'Lato', Helvetica, sans-serif;
+      font-weight:lighter;
+      margin: 0 auto;
+      text-align:center;
+    }
+
+    h2 {
+      letter-spacing: 2px;
+      padding: 0px;
+    }
+
+    h3 {
+      letter-spacing: 2.5px;
+      padding: 0px 30px 10px 5px;
+    }
+
+  input[type=range] {
+      -webkit-appearance: none;
+      border: 1px solid white;
+      width: 60%;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+      width: 300px;
+      height: 5px;
+      background: #ddd;
+      border: none;
+      border-radius: 3px;
+      border-width: .25px;
+      border-color:#fcae91;
+  }
+  input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px;
+      width: 16px;
+
+      border-color:#cb181d;
+      border-style: solid;
+      border-radius: 50%;
+      border-width: .5px;
+      background: #ddd;
+
+      margin-top: -4px;
+  }
+  input[type=range]:focus {
+      outline: none;
+  }
+  input[type=range]:focus::-webkit-slider-runnable-track {
+      background: #ccc;
+  }
+
+  input[type=range]::-moz-range-track {
+      width: 300px;
+      height: 5px;
+      background: #ddd;
+      border: none;
+      border-radius: 3px;
+  }
+  input[type=range]::-moz-range-thumb {
+      height: 16px;
+      width: 16px;
+      border-color:#cb181d;
+      border-style: solid;
+      border-radius: 50%;
+      border-width: .5px;
+      background: #ddd;
+  }
+  input[type=range]:-moz-focusring{
+      outline: 1px solid white;
+      outline-offset: -1px;
+  }
+
+  input[type=range]::-ms-track {
+      width: 300px;
+      height: 5px;
+      background: transparent;
+      border-color: transparent;
+      border-width: 6px 0;
+      color: transparent;
+  }
+  input[type=range]::-ms-fill-lower {
+      background: #777;
+      border-radius: 10px;
+  }
+  input[type=range]::-ms-fill-upper {
+      background: #ddd;
+      border-radius: 10px;
+  }
+  input[type=range]::-ms-thumb {
+      height: 16px;
+      width: 16px;
+      border-color:#cb181d;
+      border-style: solid;
+      border-radius: 50%;
+      border-width: .5px;
+      background: #ddd;
+  }
+  input[type=range]:focus::-ms-fill-lower {
+      background: #888;
+  }
+  input[type=range]:focus::-ms-fill-upper {
+      background: #ccc;
+  }
+/*  .g{
+    pointer-events: all;
+    cursor:pointer;
+   }*/
+  .countries{
+    stroke: #fff;
+    stroke-width: .5px;
+    pointer-events: all;
+    cursor:pointer;
+  }
+  .legend rect{
+    stroke: #D4D4D4;
+    stroke-width: .2px;
+  }
+  .legend_items text{
+    letter-spacing:.4em;
+  }
+  .barlabel {
+   text-anchor: middle;
+  }
+
+  #map, .map{
+    position:absolute;
+    top:100;
+    right:0;
+    z-index:-1;
+    pointer-events: all;
+    cursor:pointer;
+  }
+
+  </style>
+</head>
+
+<body onload="sizeChange()" style="pointer-events: none">
+
+  <div id="container"></div>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="https://d3js.org/topojson.v2.min.js"></script>
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  <script src="https://d3js.org/d3-geo-projection.v1.min.js"></script>
+  <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
+  <script src="functions.js"></script>
+
+  <script>
+    
+  function sizeChange() {
+  d3.select("g").attr("transform", "scale(" + $("#container").width()/900 + ")");
+  $("svg").height($("#container").width()*0.618);}
+
+  var svgBarsWidth = Math.ceil(window.innerWidth/1.2)
+  || Math.ceil(document.documentElement.clientWidth/1.2)
+  || Math.ceil(document.body.clientWidth/1.2);
+
+  var svgBarsHeight = Math.ceil(window.innerHeight/6)
+  || Math.ceil(document.documentElement.clientHeight/6)
+  || Math.ceil(document.body.clientHeight/6);
+
+  var winWidth = Math.ceil(window.innerWidth)
+  || Math.ceil(document.documentElement.clientWidth)
+  || Math.ceil(document.body.clientWidth);
+
+  var winHeight = Math.ceil(window.innerHeight)
+  || Math.ceil(document.documentElement.clientHeight)
+  || Math.ceil(document.body.clientHeight);
+
+
+if (winWidth <= 500){
+
+  barfont = '3.5pt';
+  barnum = 20;
+  countryfont = '4pt';
+  
+  svgBarsWidth = Math.ceil(window.innerWidth/1.1)
+|| Math.ceil(document.documentElement.clientWidth/1.1)
+|| Math.ceil(document.body.clientWidth/1.1);
+
+  svgBarsHeight = Math.ceil(window.innerHeight/12)
+|| Math.ceil(document.documentElement.clientHeight/12)
+|| Math.ceil(document.body.clientHeight/12);}
+    
+else if (winWidth > 500 & winWidth <=600) {
+  barfont = '5pt';
+  barnum = 25;  
+  countryfont = '5pt';}
+else if (winWidth > 600 & winWidth <=800) {
+  barfont = '7pt';
+  barnum = 25;  
+  countryfont = '7pt';}
+else if (winWidth > 800 & winWidth <=1000) {
+  barfont = '7pt';
+  barnum = 28;
+  countryfont = '7pt';}
+else if (winWidth > 1000 & winWidth <= 1200){
+  barfont = '8pt';
+  barnum = 30;
+  countryfont = '8pt';}
+else if (winWidth > 1200 & winWidth <= 1500){
+  barfont = '9pt';
+  barnum = 35;
+  countryfont = '9pt';}
+else{
+  barfont = '9pt';
+  barnum = 35;
+  countryfont = '9pt';}
+
+if (winWidth > 500){
+    if (winHeight >= 800){
+        if (winWidth <= 600) {
+          document.getElementById("container").style.height = '18%';}
+        else if (winWidth > 600 & winWidth <=800) {
+          document.getElementById("container").style.height = '31%';}
+        else if (winWidth > 800 & winWidth <=1000) {
+          document.getElementById("container").style.height = '53%';}
+        else if (winWidth > 1000 & winWidth <= 1200){
+          document.getElementById("container").style.height = '68%';}
+        else if (winWidth > 1200 & winWidth <= 1500){
+          document.getElementById("container").style.height = '97%';}
+        else{
+          document.getElementById("container").style.height = '101%';}
+    }
+    else if (winHeight >= 700 & winHeight< 800){
+        if (winWidth <= 650) {
+          document.getElementById("container").style.height = '45%';}
+        else if (winWidth > 650 & winWidth <=850) {
+          document.getElementById("container").style.height = '55%';}
+        else if (winWidth > 850 & winWidth <=1050) {
+          document.getElementById("container").style.height = '67%';}
+        else if (winWidth > 1050 & winWidth <= 1250){
+          document.getElementById("container").style.height = '85%';}
+        else if (winWidth > 1250 & winWidth <= 1500){
+          document.getElementById("container").style.height = '95%';}
+        else{
+          document.getElementById("container").style.height = '115%';}
+    }
+
+    else if (winHeight > 600 & winHeight <= 700){
+        if (winWidth <= 650) {
+          document.getElementById("container").style.height = '48%';}
+        else if (winWidth > 650 & winWidth <=850) {
+          document.getElementById("container").style.height = '60%';}
+        else if (winWidth > 850 & winWidth <=1050) {
+          document.getElementById("container").style.height = '73%';}
+        else if (winWidth > 1050 & winWidth <= 1250){
+          document.getElementById("container").style.height = '100%';}
+        else if (winWidth > 1250 & winWidth <= 1500){
+          document.getElementById("container").style.height = '115%';}
+        else{
+          document.getElementById("container").style.height = '130%';}
+    }
+
+    else if (winHeight > 500 & winHeight <= 600){
+        if (winWidth <= 650) {
+          document.getElementById("container").style.height = '58%';}
+        else if (winWidth > 650 & winWidth <=850) {
+          document.getElementById("container").style.height = '73%';}
+        else if (winWidth > 850 & winWidth <=1050) {
+          document.getElementById("container").style.height = '90%';}
+        else if (winWidth > 1050 & winWidth <= 1250){
+          document.getElementById("container").style.height = '110%';}
+        else if (winWidth > 1250 & winWidth <= 1500){
+          document.getElementById("container").style.height = '135%';}
+        else{
+          document.getElementById("container").style.height = '155%';}
+    }
+
+    else{
+        if (winWidth <= 650) {
+          document.getElementById("container").style.height = '75%';}
+        else if (winWidth > 650 & winWidth <=850) {
+          document.getElementById("container").style.height = '95%';}
+        else if (winWidth > 850 & winWidth <=1050) {
+          document.getElementById("container").style.height = '115%';}
+        else if (winWidth > 1050 & winWidth <= 1250){
+          document.getElementById("container").style.height = '135%';}
+        else if (winWidth > 1250 & winWidth <= 1500){
+          document.getElementById("container").style.height = '160%';}
+        else{
+          document.getElementById("container").style.height = '185%';}
+    }
+  }
+else{
+
+  document.getElementById("container").style.height = "19%";
+    function sizeChange() {
+      d3.select("g").attr("transform", "scale(" + $("#container").width()/1200 + ")");
+      $("svg").height($("#container").width()*0.618);}
+}
+
+    d3.select(window)
+          .on("resize", sizeChange);
+
+    var color_na = d3.rgb("#d4d4d4");
+    var quantiles = [0, 0.2, 0.4, 0.6, 0.8, 1];
+    var init_year = 1970;
+    var headline = "Peaceful Countries";
+
+    // slider
+    /*d3.select("#container").insert("p", ":first-child").append("input")
+        .attr("position","absolute")
+        .attr("type", "range")
+        .attr("min", "1970")
+        .attr("max", "2016")
+        .attr("value", init_year)
+        .attr("id", "year");*/
+
+    d3.select("#container").insert("h2", ":first-child").attr('id', 'headline').text(headline);
+    d3.select("#container").insert("h3",).attr('id', 'yeartxt').text();
+
+    if (winWidth <= 500){
+      document.getElementById('headline').style.fontSize = '8pt';
+      document.getElementById('headline').style.padding = '0 55px 0 0';
+      document.getElementById('year').style.padding = '0 55px 0 0';
+      document.getElementById('yeartxt').style.padding = '0 55px 15px 0';
+      document.getElementById('yeartxt').style.fontSize = '6pt';
+    }
+    else{
+      document.getElementById('headline').style.fontSize = '20pt';
+      document.getElementById('yeartxt').style.fontSize = '16pt';
+    }
+
+    // init map container, projection
+    var path = d3.geoPath(d3.geoRobinson());
+    var width = 960, height = 425;
+    var svg_map = d3.select("#container").append("svg")
+                  .attr("id", "map")
+                  .attr("height", height)
+                  .attr("width", '100%')
+                  .append('g');
+
+    // init legend container
+    svg_map.append("g")
+        .attr("class", "legend");
+    svg_map.append("g")
+        .attr("class", "legend_head");
+
+    // init bars container
+    var margin = {top: 40, right:50, bottom:50, left:30};
+    // var svgBarsWidth = 1200 - margin.left - margin.right;
+    // var svgBarsHeight = 200 - margin.top - margin.bottom;
+
+    var x = d3.scaleBand()
+                .rangeRound([0, svgBarsWidth])
+                .padding(.05);
+    var y = d3.scaleLinear().range([svgBarsHeight, 0]);
+
+    var svg_bars = d3.select("body")
+        .append("svg")
+          .attr("id", "bars")
+          .attr("width", svgBarsWidth + margin.left + margin.right)
+         .attr("height", svgBarsHeight + margin.top + margin.bottom)
+        .append("g")
+          .attr("class", "bars")
+          .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+    // load data
+    d3.json("data.json", function(error, d) {
+
+      if (error) throw error;
+
+      let data_all = d['Terror'];
+
+      let data = data_all[init_year];
+      let color = calcColorScale(data);
+
+      // load map data and render it 
+      d3.json("world.json", function(error, worldmap) {
+        if (error) throw error;
+
+      // init map
+	var colorfill
+      svg_map.append("g")
+        .attr("class", "countries")
+        .style('pointer-events', 'all')
+        .selectAll("path")
+        .data(topojson.feature(worldmap, worldmap.objects.world).features)
+        .enter().append("path")
+        .attr("d", path)
+        .attr("id", function(d) { return d.id; })
+        .call(fillMap, color, data)	
+        .on("mouseover", function(d) {
+                    var xPosition = d3.mouse(this)[0];
+                    var yPosition = d3.mouse(this)[1] - 10;
+		    colorfill= d3.rgb(d3.select(this).attr("style"));
+                    svg_map.append("text")
+                        .attr("id", "tooltip")
+                        .attr("x", xPosition)
+                        .attr("y", yPosition)
+                        .attr("text-anchor", "middle")
+                        .attr("font-family", "sans-serif")
+                        .attr("font-size", "11px")
+                        .attr("font-weight", "bold")
+                        .attr("fill", "black")
+                        .text(d.id);
+
+                    /*d3.select(this)
+                    .style("fill", "#509e2f");*/
+                })
+                .on("mouseout", function(d) {
+                    d3.select("#tooltip").remove();
+		    d3.select(this)
+                    .transition()
+                    .duration(250);
+                    /*.style("fill", function(d) {
+                    var population = d.value;
+
+                    if (population) {
+                        return color(population);
+                    } else {
+                        return "#ddd";
+                    }
+});*/});
+        //.call(setPathTitle, data).append("title")
+        //.on("click", country_clicked);
+	//.on("mouseover", setPathTitle);
+
+      // init rest
+      renderLegend(color, data);
+     // renderBars(color, data);
+      renderComment(color,data);
+
+      });
+    //   d3.selectAll(".g").on("mouseover", function() {
+//console.log("mouseover"); });
+      // was the slider used?
+      d3.select("#year").on("input", function() {
+          let upd_color = calcColorScale(data_all[this.value]);
+          updateMap(upd_color, data_all[this.value]);
+          renderLegend(upd_color, data_all[this.value]);
+          //renderBars(upd_color, data_all[this.value]);
+          renderComment(upd_color, data_all[this.value]);
+      });
+
+    }); 
+
+  </script>
+</body>
+</html>
