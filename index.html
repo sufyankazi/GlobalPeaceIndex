@@ -167,8 +167,8 @@
   <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
   <script src="https://d3js.org/d3-geo-projection.v1.min.js"></script>
   <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js'></script>
-  <script src="functions.js"></script>
-
+//  <script src="functions.js"></script>
+  <script src='https://github.com/sufyankazi/GlobalPeaceIndex/blob/master/functions.js'></script>
   <script>
     
   function sizeChange() {
@@ -381,7 +381,7 @@ else{
           .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
     // load data
-    d3.json("data.json", function(error, d) {
+    d3.json("https://github.com/sufyankazi/GlobalPeaceIndex/blob/master/data.json", function(error, d) {
 
       if (error) throw error;
 
@@ -391,7 +391,7 @@ else{
       let color = calcColorScale(data);
 
       // load map data and render it 
-      d3.json("world.json", function(error, worldmap) {
+      d3.json("https://github.com/sufyankazi/GlobalPeaceIndex/blob/master/world.json", function(error, worldmap) {
         if (error) throw error;
 
       // init map
